@@ -82,7 +82,7 @@
 			$error_field['task_useremail'] = true;
 		} else {
 			$task_useremail = strip_tags(trim($_POST['task_useremail']));
-			if (preg_match("/.+@.+\..+/i", $task_useremail)) {
+			if (!preg_match("/.+@.+\..+/i", $task_useremail)) {
 	      		$message['error'][] = "<strong>Ошибка!</strong> Поле «Email address» введено не верно.";
 	      		$error_field['task_useremail'] = true;
 	   		}

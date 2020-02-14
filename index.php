@@ -115,6 +115,40 @@
 		}
 	}
 
+	// сортировка
+	
+	if (isset($_POST['task_sort_submit'])) {
+		// Проверяем на спам. Если скрытое поле заполнено или снят чек, то блокируем отправку
+		if (false === $_POST['task_sort_anticheck'] || ! empty( $_POST['task_sort_hidden'] ) ) {
+			die();
+		}
+		
+		$order_field = strip_tags(trim($_POST['task_sort_select']));
+		$desc = "";
+		if (isset($_POST['task_sort_desc'])) {
+			$desc = "DESC";
+		}
+
+		$_SESSION['order_field'] = $order_field;
+		$_SESSION['desc'] = $desc;
+
+	}
+
+	if (isset($_SESSION['order_field'])) {
+		$order_field = $_SESSION['order_field'];
+	} else {
+		$order_field = "task_username";
+	}
+
+	if (isset($_SESSION['desc'])) {
+		$desc = $_SESSION['desc'];
+	} else {
+		$desc = "";
+	}
+
+
+
+
  ?>
 
 <!doctype html>
@@ -202,6 +236,27 @@
   			</div>
   			<div class="section-content row">
   				<div class="col-12">
+  					<div class="row">
+  						<!-- форма сортировки -->
+						<form method="POST">
+							<input type="text" name="task_sort_hidden" value="" style="display: none !important;"/>
+							<input type="checkbox" name="task_sort_anticheck" style="display: none !important;" value="true" checked="checked"/>
+		    				<div class="form-group">
+					   			<label for="inputState">Сортировка</label>
+						      	<select id="task_sort_select" name="task_sort_select" class="form-control">
+						        	<option <?=task_sort_selected('task_username');?> value="task_username">По имени пользователя</option>
+						        	<option <?=task_sort_selected('task_useremail');?> value="task_useremail">По email</option>
+						        	<option <?=task_sort_selected('is_done');?> value="is_done">По статусу</option>
+						      	</select>
+						  	</div>
+							<div class="form-check mb-2">
+								<?php $checked = ($desc !== "") ? 'checked' : ''; ?>
+								<input <?=$checked;?> type="checkbox" class="form-check-input" id="task_sort_desc" name="task_sort_desc">
+							    <label class="form-check-label" for="task_sort_desc">По убыванию</label>
+						  	</div>
+							<button type="submit" name="task_sort_submit" class="btn btn-primary">Изменить</button>
+						</form>
+  					</div>
 
   					<?php
   						$offset = 0;
@@ -215,13 +270,12 @@
 
   						try {
   							$count_order = $pdo->query("SELECT COUNT(*) FROM `taskbook_tasks`")->fetchColumn();
-
-  							$stmt = $pdo->prepare("SELECT * FROM `taskbook_tasks` ORDER BY `task_id` DESC LIMIT :start, :num"); //LIMIT :start,:num
-  							// $stmt->bindValue(":order_field", 'task_id');
-	  						$stmt->bindValue(":start", $offset, PDO::PARAM_INT);
+  							$desc = "DESC";
+  							$query = "SELECT * FROM `taskbook_tasks` ORDER BY `" . $order_field."` " . $desc . " LIMIT :start, :num";
+  							$stmt = $pdo->prepare($query); //LIMIT :start,:num
+  	  						$stmt->bindValue(":start", $offset, PDO::PARAM_INT);
 							$stmt->bindValue(":num", $limit, PDO::PARAM_INT);
 							$stmt->execute();
-							// var_dump($s);
 							$tasks = $stmt->fetchAll();
 
 							foreach ($tasks as $task) { ?>

@@ -2,6 +2,15 @@
 
 	session_start();
 
+
+	if (isset($_SESSION['login'])) {
+		$login = $_SESSION['login'];
+		$is_authorized = true;
+	} else {
+		header('Location:index.php');
+		exit;
+	}
+
 	require_once "connect.php";
 	require_once "functions.php";
 

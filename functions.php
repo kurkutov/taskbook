@@ -12,3 +12,7 @@
 	function get_edit_form_val(string $field_name, $data_field) {
 		return (isset($_POST[$field_name])) ?  $_POST[$field_name] : $data_field;
 	}
+
+	function task_sort_selected(string $field) {
+		return (isset($_SESSION['order_field']) && ($_SESSION['order_field'] == $field)) ?  'selected' : '';
+	}
